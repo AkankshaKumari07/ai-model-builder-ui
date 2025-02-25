@@ -1,19 +1,18 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 import type { CreateModelForm } from "@/types"
 import { useState } from "react"
+import { Button } from "./base/button"
+import { Input } from "./base/input"
+import { Select } from "./base/select"
+import { Modal } from "./modal"
 
 interface CreateModelDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  isOpen: boolean
+  onClose: () => void
 }
 
-export function CreateModelDialog({ open, onOpenChange }: CreateModelDialogProps) {
+export function CreateModelDialog({ isOpen, onClose }: CreateModelDialogProps) {
   const [formData, setFormData] = useState<CreateModelForm>({
     modelName: "",
     modelType: "",
@@ -23,70 +22,54 @@ export function CreateModelDialog({ open, onOpenChange }: CreateModelDialogProps
 
   const handleSubmit = () => {
     console.log("Form Data:", formData)
-    onOpenChange(false)
+    onClose()
   }
 
+  const modelTypes = [
+    { value: "extraction", label: "Extraction" },
+    { value: "classification", label: "Classification" },
+    { value: "generation", label: "Generation" },
+  ]
+
+  const llmOptions = [
+    { value: "gpt-4", label: "GPT-4" },
+    { value: "gpt-3.5", label: "GPT-3.5" },
+    { value: "claude", label: "Claude" },
+  ]
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Create new model</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <Input
-              id="modelName"
-              placeholder="Model Name"
-              value={formData.modelName}
-              onChange={(e) => setFormData({ ...formData, modelName: e.target.value })}
-            />
-          </div>
-          <div className="space-y-2">
-            <Select
-              value={formData.modelType}
-              onValueChange={(value) => setFormData({ ...formData, modelType: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Model Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="extraction">Extraction</SelectItem>
-                <SelectItem value="classification">Classification</SelectItem>
-                <SelectItem value="generation">Generation</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Select value={formData.llm} onValueChange={(value) => setFormData({ ...formData, llm: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="LLM" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gpt-4">GPT-4</SelectItem>
-                <SelectItem value="gpt-3.5">GPT-3.5</SelectItem>
-                <SelectItem value="claude">Claude</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Textarea
-              id="modelDescription"
-              placeholder="Model Description"
-              value={formData.modelDescription}
-              onChange={(e) => setFormData({ ...formData, modelDescription: e.target.value })}
-            />
-          </div>
-        </div>
+    <Modal isOpen={isOpen} onClose={onClose} title="Create new model">
+      <div className="space-y-4">
+        <Input
+          placeholder="Model Name"
+          value={formData.modelName}
+          onChange={(e) => setFormData({ ...formData, modelName: e.target.value })}
+        />
+        <Select
+          options={modelTypes}
+          value={formData.modelType}
+          onChange={(e) => setFormData({ ...formData, modelType: e.target.value })}
+        />
+        <Select
+          options={llmOptions}
+          value={formData.llm}
+          onChange={(e) => setFormData({ ...formData, llm: e.target.value })}
+        />
+        <textarea
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#4F46E5]"
+          placeholder="Model Description"
+          value={formData.modelDescription}
+          onChange={(e) => setFormData({ ...formData, modelDescription: e.target.value })}
+          rows={4}
+        />
         <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button className="bg-[#4F46E5] hover:bg-[#4F46E5]/90" onClick={handleSubmit}>
-            Save
-          </Button>
+          <Button onClick={handleSubmit}>Save</Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </Modal>
   )
 }
 
