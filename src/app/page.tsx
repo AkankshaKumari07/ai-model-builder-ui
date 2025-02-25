@@ -1,24 +1,36 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { useState } from "react"
-import { Button } from "./components/base/button"
-import { Input } from "./components/base/input"
-import { CreateModelDialog } from "./components/create-model-dialog"
-import { DataTable } from "./components/data-table"
-import { Sidebar } from "./components/sidebar"
-import { generateDummyData } from "@/data"
-
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Button } from "./components/base/button";
+import { Input } from "./components/base/input";
+import { CreateModelDialog } from "./components/create-model-dialog";
+import { DataTable } from "./components/data-table";
+import { Sidebar } from "./components/sidebar";
+import { generateDummyData } from "@/data";
+import { CreateModelForm } from "@/types";
 
 export default function Page() {
-  const [isCreateModelOpen, setIsCreateModelOpen] = useState(false)
-  const data = generateDummyData()
+  const [isCreateModelOpen, setIsCreateModelOpen] = useState(false);
+  const [models, setModels] = useState<CreateModelForm[]>([])
+
+  const data = generateDummyData();
+
+  useEffect(() => {
+    const savedModels = JSON.parse(localStorage.getItem("models") || "[]")
+    setModels(savedModels)
+  }, [])
+  
+  const handleModelSave = (newModel: CreateModelForm) => {
+    const updatedModels = [...models, newModel]
+    setModels(updatedModels)
+    localStorage.setItem("models", JSON.stringify(updatedModels))
+  }
 
   return (
     <div className="hidden md:block text-black">
       <div className="border-b">
         <div className="flex h-16 items-center px-4">
-    
           <div className="text-lg text-gray-500">AI/ML Model Builder</div>
           <div className="ml-auto flex items-center space-x-4">
             <div className="relative">
@@ -69,7 +81,12 @@ export default function Page() {
             </button>
             <button className="p-2 hover:bg-gray-100 rounded-lg">
               <div className="relative h-8 w-8">
-                <Image src="/images/avatar.jpg" alt="Avatar" className="rounded-full" fill />
+                <Image
+                  src="/images/avatar.jpg"
+                  alt="Avatar"
+                  className="rounded-full"
+                  fill
+                />
               </div>
             </button>
           </div>
@@ -81,14 +98,19 @@ export default function Page() {
           <div className="flex items-center justify-between space-y-2">
             <h2 className="text-3xl font-bold tracking-tight">Model Library</h2>
             <div className="flex items-center space-x-2">
-              <Button onClick={() => setIsCreateModelOpen(true)}>Create New Model</Button>
+              <Button onClick={() => setIsCreateModelOpen(true)}>
+                Create New Model
+              </Button>
             </div>
           </div>
           <DataTable data={data} />
         </div>
       </div>
-      <CreateModelDialog isOpen={isCreateModelOpen} onClose={() => setIsCreateModelOpen(false)} />
+      <CreateModelDialog
+        isOpen={isCreateModelOpen}
+        onClose={() => setIsCreateModelOpen(false)}
+        onModelSave={handleModelSave}
+      />
     </div>
-  )
+  );
 }
-

@@ -10,9 +10,10 @@ import { Modal } from "./modal"
 interface CreateModelDialogProps {
   isOpen: boolean
   onClose: () => void
+  onModelSave: (model: CreateModelForm) => void
 }
 
-export function CreateModelDialog({ isOpen, onClose }: CreateModelDialogProps) {
+export function CreateModelDialog({ isOpen, onClose,onModelSave }: CreateModelDialogProps) {
   const [formData, setFormData] = useState<CreateModelForm>({
     modelName: "",
     modelType: "",
@@ -21,10 +22,13 @@ export function CreateModelDialog({ isOpen, onClose }: CreateModelDialogProps) {
   })
 
   const handleSubmit = () => {
-    console.log("Form Data:", formData)
+    const existingModels = JSON.parse(localStorage.getItem("models") || "[]")
+    const updatedModels = [...existingModels, formData]
+
+    localStorage.setItem("models", JSON.stringify(updatedModels))
+    onModelSave(formData)
     onClose()
   }
-
   const modelTypes = [
     { value: "extraction", label: "Extraction" },
     { value: "classification", label: "Classification" },
